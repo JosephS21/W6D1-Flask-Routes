@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect
 from app import app, db
 from app.forms import RegisterForm, LoginInForm, BlogForm, CarForm
 from app.models import User, Car, Blog
-
+from flask_login import current_user, login_user
 
 @app.route('/', methods=['GET', 'POST'])
 def car():
@@ -13,7 +13,9 @@ def car():
         model = form.model.data
         color = form.color.data
         price = form.price.data
-        description = form.description
+        description = form.description.data
+        c = Car(year=year, make=make, model=model,color=color,price=price,description=description)
+        c.commit()
         flash(f'Car information sent!')
     return render_template('index.html.jinja', car_form=form, title='Home')
 
@@ -32,7 +34,7 @@ def register():
         last_name= form.last_name.data
         u = User(username=username, email=email, password=password, first_name=first_name,last_name=last_name)
         user_match = User.query.filter_by(username=username).first()
-        email_match = User.query.filter_by(email=email)
+        email_match = User.query.filter_by(email=email).first()
         if user_match:
             flash(f'Username {username} already exists, try again! ')
             return redirect('/register')
@@ -49,7 +51,14 @@ def register():
 def log_in():
     form=LoginInForm()
     if form.validate_on_submit():
-        flash(f'{form.username.data} successfully signed in!')
+        username= form.username.data
+        password= form.password.data
+        user_match= User.query.filter_by(username=username).first()
+        if not user_match or user_match.password != password:
+            flash(f'Username or Passowrd does not work, try again!')
+            return redirect('/login')
+        flash(f'{username} successfully signed in!')
+        # login_user(user_match)
         return redirect('/')
     return render_template('login.jinja', log_in_form=form)
 
@@ -57,7 +66,9 @@ def log_in():
 def blog():
     form=BlogForm()
     if form.validate_on_submit():
-        blogblock=form.blogblock.data  
+        blogblock=form.blogblock.data
+        b=Blog(blogblock=blogblock) 
+        b.commit()
         flash(f'Successfully sent a Blog!')
     return render_template('blog.jinja', blog_form=form)
 

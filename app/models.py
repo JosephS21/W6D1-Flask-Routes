@@ -1,5 +1,11 @@
-from app import db
+from app import db, login
 from datetime import datetime
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 class User(db.Model):
     id= db.Column(db.Integer, primary_key=True)
     username= db.Column(db.String(64), unique=True, nullable=True)
@@ -14,6 +20,7 @@ class User(db.Model):
     def __repr__(self):
         return f'<User: {self.username}>'
     
+    
     def commit(self):
         db.session.add(self)
         db.session.commit()
@@ -26,6 +33,10 @@ class Blog(db.Model):
 
     def __repr__(self):
         return f'<Blogs: {self.blogblock}>'
+    
+    def commit(self):
+        db.session.add(self)
+        db.session.commit()
     
     
 
@@ -42,4 +53,8 @@ class Car(db.Model):
 
     def __repr__(self):
         return f'<Info: {self.year}, {self.make}, {self.model}, {self.color}, {self.price}, {self.description}!>'
+    
+    def commit(self):
+        db.session.add(self)
+        db.session.commit()
     
