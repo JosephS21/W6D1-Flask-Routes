@@ -12,9 +12,9 @@
       {{ log_in_form.password.label }}<br>
       {{ log_in_form.password(size=32) }}
       </p>
+      <p>{{ log_in_form.remember_me() }} {{ log_in_form.remember_me.label }}</p>
       <p>
       {{ log_in_form.submit(class='btn btn-primary') }}
-      
       </p>
     </form>
 {% endblock %}

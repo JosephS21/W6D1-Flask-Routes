@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect
 from app import app, db
 from app.forms import RegisterForm, LoginInForm, BlogForm, CarForm
 from app.models import User, Car, Blog
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user, login_required
 
 @app.route('/', methods=['GET', 'POST'])
 def car():
@@ -58,11 +58,12 @@ def log_in():
             flash(f'Username or Passowrd does not work, try again!')
             return redirect('/login')
         flash(f'{username} successfully signed in!')
-        # login_user(user_match)
+        login_user(user_match)
         return redirect('/')
     return render_template('login.jinja', log_in_form=form)
 
 @app.route('/blog', methods=['GET','POST'])
+@login_required
 def blog():
     form=BlogForm()
     if form.validate_on_submit():
@@ -71,4 +72,20 @@ def blog():
         b.commit()
         flash(f'Successfully sent a Blog!')
     return render_template('blog.jinja', blog_form=form)
+
+
+@app.route('/signout')
+@login_required
+def sign_out():
+    logout_user()
+    return redirect('/')
+
+@app.route('/user/<username>')
+def user(username):
+    user_match = User.query.filter_by(username=username).first()
+    if not user_match:
+        return redirect ('/')
+    posts = user_match.posts
+    return render_template('user.jinja', user=user_match, posts=posts)
+
 
